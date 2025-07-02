@@ -48,7 +48,11 @@ import TeacherNotifications from "./components/TeacherNotifications";
 import StudentNotifications from "./components/StudentNotifications";
 import TeacherNotificationForm from "./components/TeacherNotificationForm";
 import AdminCourseManager from "./components/AdminCourseManager";
+import TeacherCourses from "./components/TeacherCourses";
+import Home from "./components/Home";
+// import StudentProfile from "./components/StudentProfile";
 
+import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
   return (
@@ -64,11 +68,19 @@ function App() {
         <Route path="/student/recieve-notification" element={<StudentNotifications />} />
         <Route path="/teacher/send-notification" element={<TeacherNotificationForm />} />
         <Route path="/admin/manage-courses" element={<AdminCourseManager />} />
+        <Route path="/teacher/courses" element={<TeacherCourses />}/>
+        {/* <Route path="/student/profile" element={<StudentProfile />} /> */}
+        <Route path="/home" element={<Home />}/>
 
 
       </Routes>
     </Router>
   );
 }
-
 export default App;
+
+// // export default App;
+// function App() {
+//   return <h1>Hello World</h1>;
+// }
+// export default App;

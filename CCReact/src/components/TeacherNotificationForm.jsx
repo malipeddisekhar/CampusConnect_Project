@@ -9,7 +9,6 @@ function TeacherNotificationForm() {
     const [name, setName] = useState("");
     const [role, setRole] = useState("");
     const navigate = useNavigate();
-
     useEffect(() => {
         const storedName = localStorage.getItem("username");
         const storedRole = localStorage.getItem("role");

@@ -1,5 +1,8 @@
 package com.example.CCSpring.model;
 
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -7,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -30,8 +34,12 @@ public class User {
     @Column(nullable = false)
     private Role role; // Enum: ADMIN, TEACHER, STUDENT
 
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    private List<CourseStudent> enrollments;
+
     // No-argument constructor (required by JPA)
-    public User() {}
+    public User() {
+    }
 
     // Getters and Setters
 
@@ -70,4 +78,16 @@ public class User {
     public void setRole(Role role) {
         this.role = role;
     }
+
+    // public List<Course> getCourses() {
+    // return courses;
+    // }
+    public List<CourseStudent> getEnrollments() {
+        return enrollments;
+    }
+
+    public void setEnrollments(List<CourseStudent> enrollments) {
+        this.enrollments = enrollments;
+    }
+
 }

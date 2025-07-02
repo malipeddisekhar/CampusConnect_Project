@@ -1,5 +1,9 @@
 package com.example.CCSpring.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -7,30 +11,31 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class Course {
-    @Id
+@Id
 @GeneratedValue(strategy = GenerationType.IDENTITY)
 private Long id;
 
-// Course name (e.g., "DBMS", "OOP")
 @Column(nullable = false)
-private String name;
+private String name; // e.g., DBMS
 
-// Associated branch (e.g., "CSE", "IT", etc.)
 @Column(nullable = false)
-private String branch;
+private String branch; // e.g., CSE
 
-// Assigned teacher (optional, can be null = "Not yet appointed")
 @ManyToOne
 @JoinColumn(name = "teacher_id")
 private User teacher;
 
-// No-arg constructor required by JPA
+@OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+private List<CourseStudent> enrollments = new ArrayList<>();
+
 public Course() {}
 
-// Getters and setters
+// Getters and Setters
+
 public Long getId() {
     return id;
 }
@@ -57,5 +62,13 @@ public User getTeacher() {
 
 public void setTeacher(User teacher) {
     this.teacher = teacher;
+}
+
+public List<CourseStudent> getEnrollments() {
+    return enrollments;
+}
+
+public void setEnrollments(List<CourseStudent> enrollments) {
+    this.enrollments = enrollments;
 }
 }

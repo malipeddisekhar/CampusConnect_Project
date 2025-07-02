@@ -1,97 +1,96 @@
 package com.example.CCSpring.controller;
 
-import com.example.CCSpring.model.Course;
-import com.example.CCSpring.model.User;
-import com.example.CCSpring.repository.CourseRepository;
-import com.example.CCSpring.repository.UserRepository;
-
-import jakarta.servlet.http.HttpSession;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.example.CCSpring.model.Course;
+import com.example.CCSpring.model.User;
+import com.example.CCSpring.service.CourseService;
+import com.example.CCSpring.service.CourseStudentService;
+
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/api/courses")
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+// @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class CourseController {
 
     @Autowired
-    private CourseRepository courseRepo;
+    private CourseService courseService;
 
     @Autowired
-    private UserRepository userRepo;
+    private CourseStudentService courseStudentService;
 
-    // ✅ Admin creates a new course
     @PostMapping("/create")
-    public ResponseEntity<?> createCourse(@RequestBody Course course, HttpSession session) {
-        Object userId = session.getAttribute("LoggedInUser");
-        if (userId == null) {
-            return ResponseEntity.status(401).body("Unauthorized");
-        }
+    public ResponseEntity<?> createCourse(@RequestBody Map<String, String> data) {
+        String name = data.get("name");
+        String branch = data.get("branch");
 
-        User admin = userRepo.findById(Long.valueOf(userId.toString())).orElse(null);
-        if (admin == null || !admin.getRole().toString().equalsIgnoreCase("ADMIN")) {
-            return ResponseEntity.status(403).body("Only admin can create courses");
-        }
-
-        try {
-            courseRepo.save(course);
-            return ResponseEntity.ok("Course created successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Failed to create course: " + e.getMessage());
-        }
+        Course created = courseService.createCourse(name, branch);
+        return ResponseEntity.ok(created);
     }
 
-    // ✅ Admin assigns a teacher to a course
     @PutMapping("/assign-teacher")
-    public ResponseEntity<?> assignTeacher(
-            @RequestParam Long courseId,
-            @RequestParam Long teacherId,
-            HttpSession session
-    ) {
-        Object userId = session.getAttribute("LoggedInUser");
-        if (userId == null) {
-            return ResponseEntity.status(401).body("Unauthorized");
-        }
-
-        User admin = userRepo.findById(Long.valueOf(userId.toString())).orElse(null);
-        if (admin == null || !admin.getRole().toString().equalsIgnoreCase("ADMIN")) {
-            return ResponseEntity.status(403).body("Only admin can assign teachers");
-        }
-
-        Course course = courseRepo.findById(courseId).orElse(null);
-        User teacher = userRepo.findById(teacherId).orElse(null);
-
-        if (course == null || teacher == null || !teacher.getRole().toString().equalsIgnoreCase("TEACHER")) {
-            return ResponseEntity.badRequest().body("Invalid course or teacher ID");
-        }
-
-        course.setTeacher(teacher);
-        courseRepo.save(course);
-
-        return ResponseEntity.ok("Teacher assigned to course successfully");
+    public ResponseEntity<?> assignTeacher(@RequestParam Long courseId, @RequestParam Long teacherId) {
+        boolean success = courseService.assignTeacher(courseId, teacherId);
+        return success ? ResponseEntity.ok("Teacher assigned")
+                : ResponseEntity.badRequest().body("Failed to assign teacher");
     }
 
-    // ✅ Admin gets all courses
     @GetMapping("/all")
-    public List<Course> getAllCourses() {
-        return courseRepo.findAll();
+    public ResponseEntity<List<Course>> getAllCourses() {
+        return ResponseEntity.ok(courseService.getAllCourses());
     }
 
-    // ✅ (Optional) Courses with no teacher assigned
-    @GetMapping("/unassigned")
-    public List<Course> getUnassignedCourses() {
-        return courseRepo.findByTeacherIsNull();
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteCourse(@PathVariable Long id) {
+        boolean deleted = courseService.deleteCourse(id);
+        return deleted ? ResponseEntity.ok("Course deleted")
+                : ResponseEntity.badRequest().body("Failed to delete course");
     }
 
-    // ✅ Teacher-specific: view assigned courses (used later)
-    @GetMapping("/by-teacher")
-    public List<Course> getCoursesByTeacher(@RequestParam Long teacherId) {
-        User teacher = userRepo.findById(teacherId).orElse(null);
-        if (teacher == null) return List.of();
-        return courseRepo.findByTeacher(teacher);
+    @GetMapping("/my-course")
+    public ResponseEntity<?> getMyCourse(HttpSession session) {
+        Long userId = (Long) session.getAttribute("LoggedInUser");
+        if (userId == null) {
+            return ResponseEntity.status(401).body("Not logged in");
+        }
+
+        List<Course> courses = courseStudentService.getCoursesByStudentId(userId);
+        if (!courses.isEmpty()) {
+            return ResponseEntity.ok(courses.get(0));
+        }
+
+        Course teacherCourse = courseService.getCourseByTeacherId(userId);
+        return ResponseEntity.ok(teacherCourse);
     }
+
+    @GetMapping("/enrolled-students")
+    public ResponseEntity<List<User>> getEnrolledStudents(@RequestParam Long courseId) {
+        List<User> students = courseStudentService.getStudentsByCourse(courseId);
+        return ResponseEntity.ok(students);
+    }
+
+    @PutMapping("/enroll-student")
+    public ResponseEntity<?> enrollStudent(@RequestParam Long courseId, @RequestParam Long studentId) {
+        boolean enrolled = courseStudentService.enrollStudentToCourse(courseId, studentId);
+        if (enrolled) {
+            return ResponseEntity.ok("Student enrolled");
+        } else {
+            return ResponseEntity.badRequest().body("Enrollment failed (already enrolled or invalid)");
+        }
+    }
+
 }
