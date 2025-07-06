@@ -177,6 +177,8 @@ CampusConnect/
 │   │       └── global.css
 ├── package.json
 ├── vite.config.js
+
+
 ✅ Notes
 Adjust folder names to your actual project if you're not using frontend/ or backend/.
 
