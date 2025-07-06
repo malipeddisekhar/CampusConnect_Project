@@ -2,6 +2,9 @@ package com.example.CCSpring.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,8 +36,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role; // Enum: ADMIN, TEACHER, STUDENT
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<CourseStudent> enrollments;
 
     // No-argument constructor (required by JPA)

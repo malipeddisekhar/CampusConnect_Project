@@ -15,8 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.CCSpring.dto.CourseWithStudentCountDTO;
+import com.example.CCSpring.dto.StudentInfoDTO;
 import com.example.CCSpring.model.Course;
-import com.example.CCSpring.model.User;
 import com.example.CCSpring.service.CourseService;
 import com.example.CCSpring.service.CourseStudentService;
 
@@ -61,13 +62,31 @@ public class CourseController {
                 : ResponseEntity.badRequest().body("Failed to delete course");
     }
 
-    @GetMapping("/my-course")
-    public ResponseEntity<?> getMyCourse(HttpSession session) {
-        Long userId = (Long) session.getAttribute("LoggedInUser");
-        if (userId == null) {
-            return ResponseEntity.status(401).body("Not logged in");
-        }
+    // @GetMapping("/my-course")
+    // public ResponseEntity<?> getMyCourse(HttpSession session) {
+    //     Long userId = (Long) session.getAttribute("LoggedInUser");
+    //     if (userId == null) {
+    //         return ResponseEntity.status(401).body("Not logged in");
+    //     }
 
+    //     List<Course> courses = courseStudentService.getCoursesByStudentId(userId);
+    //     if (!courses.isEmpty()) {
+    //         return ResponseEntity.ok(courses.get(0));
+    //     }
+
+    //     Course teacherCourse = courseService.getCourseByTeacherId(userId);
+    //     return ResponseEntity.ok(teacherCourse);
+    // }
+@GetMapping("/my-course")
+public ResponseEntity<?> getMyCourse(HttpSession session) {
+    Long userId = (Long) session.getAttribute("LoggedInUser");
+    System.out.println("Session user: " + userId);
+
+    if (userId == null) {
+        return ResponseEntity.status(401).body("Not logged in");
+    }
+
+    try {
         List<Course> courses = courseStudentService.getCoursesByStudentId(userId);
         if (!courses.isEmpty()) {
             return ResponseEntity.ok(courses.get(0));
@@ -75,22 +94,39 @@ public class CourseController {
 
         Course teacherCourse = courseService.getCourseByTeacherId(userId);
         return ResponseEntity.ok(teacherCourse);
+    } catch (Exception e) {
+        e.printStackTrace();  // 🔍 very important
+        return ResponseEntity.status(500).body("Something went wrong: " + e.getMessage());
     }
+}
 
-    @GetMapping("/enrolled-students")
-    public ResponseEntity<List<User>> getEnrolledStudents(@RequestParam Long courseId) {
-        List<User> students = courseStudentService.getStudentsByCourse(courseId);
-        return ResponseEntity.ok(students);
-    }
+    // @GetMapping("/enrolled-students")
+    // public ResponseEntity<List<User>> getEnrolledStudents(@RequestParam Long courseId) {
+    //     List<User> students = courseStudentService.getStudentsByCourse(courseId);
+    //     return ResponseEntity.ok(students);
+    // }
 
     @PutMapping("/enroll-student")
     public ResponseEntity<?> enrollStudent(@RequestParam Long courseId, @RequestParam Long studentId) {
         boolean enrolled = courseStudentService.enrollStudentToCourse(courseId, studentId);
+        System.out.println("Enroll Request: courseId=" + courseId + ", studentId=" + studentId);
         if (enrolled) {
             return ResponseEntity.ok("Student enrolled");
         } else {
             return ResponseEntity.badRequest().body("Enrollment failed (already enrolled or invalid)");
         }
+    }
+
+    @GetMapping("/summary")
+    public ResponseEntity<List<CourseWithStudentCountDTO>> getCourseSummaries() {
+        return ResponseEntity.ok(courseService.getAllCourseSummaries());
+    }
+
+    // In CourseController.java
+    @GetMapping("/enrolled-students")
+    public ResponseEntity<?> getEnrolledStudents(@RequestParam Long courseId) {
+        List<StudentInfoDTO> students = courseService.getEnrolledStudentsForCourse(courseId);
+        return ResponseEntity.ok(students);
     }
 
 }

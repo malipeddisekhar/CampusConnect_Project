@@ -1,0 +1,93 @@
+:root {
+  --primary-bg: #c2daf1;
+  --secondary-bg: #ffffff;
+  --sidebar-bg: #2c3e50;
+  --accent: #ff7043;
+  --text: #333;
+}
+
+body.dark {
+  --primary-bg: #1e1e2f;
+  --secondary-bg: #2c2c3a;
+  --sidebar-bg: #1a1a2f;
+  --accent: #d81b60;
+  --text: #f0e6f6;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(to bottom, var(--primary-bg), var(--secondary-bg));
+  color: var(--text);
+  transition: all 0.3s ease;
+}
+
+.admin-dashboard {
+  display: flex;
+  min-height: 100vh;
+  padding-top: 4rem;
+}
+
+.sidebar {
+  background-color: var(--sidebar-bg);
+  color: white;
+  padding: 1rem;
+  width: 250px;
+  min-height: 100vh;
+}
+
+.sidebar hr {
+  border-color: white;
+}
+
+.sidebar button {
+  width: 100%;
+  padding: 0.5rem;
+}
+
+.sidebar-toggle-btn {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1001;
+  background: var(--accent);
+  border: none;
+  padding: 0.4rem 1rem;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.theme-toggle-btn {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1001;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+}
+
+.admin-card {
+  background-color: var(--secondary-bg);
+  border-left: 5px solid var(--accent);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+}
+
+.admin-card p {
+  margin: 0.5rem 0 0;
+  color: var(--text);
+}

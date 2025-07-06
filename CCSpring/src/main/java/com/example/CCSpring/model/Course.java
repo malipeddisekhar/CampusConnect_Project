@@ -3,6 +3,9 @@ package com.example.CCSpring.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,62 +16,70 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 @Entity
 public class Course {
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
 
-@Column(nullable = false)
-private String name; // e.g., DBMS
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-@Column(nullable = false)
-private String branch; // e.g., CSE
+    @Column(nullable = false)
+    private String name;
 
-@ManyToOne
-@JoinColumn(name = "teacher_id")
-private User teacher;
+    @Column(nullable = false)
+    private String branch;
 
-@OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
-private List<CourseStudent> enrollments = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "teacher_id")
+    private User teacher;
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 
-public Course() {}
+    // @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    // @JsonManagedReference
+    // private List<CourseStudent> enrollments = new ArrayList<>();
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // prevents recursion issues for now
+    private List<CourseStudent> enrollments = new ArrayList<>();
 
-// Getters and Setters
+    public Course() {
+    }
 
-public Long getId() {
-    return id;
-}
+    // Getters and Setters
 
-public String getName() {
-    return name;
-}
+    public Long getId() {
+        return id;
+    }
 
-public void setName(String name) {
-    this.name = name;
-}
+    public String getName() {
+        return name;
+    }
 
-public String getBranch() {
-    return branch;
-}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-public void setBranch(String branch) {
-    this.branch = branch;
-}
+    public String getBranch() {
+        return branch;
+    }
 
-public User getTeacher() {
-    return teacher;
-}
+    public void setBranch(String branch) {
+        this.branch = branch;
+    }
 
-public void setTeacher(User teacher) {
-    this.teacher = teacher;
-}
+    public User getTeacher() {
+        return teacher;
+    }
 
-public List<CourseStudent> getEnrollments() {
-    return enrollments;
-}
+    public void setTeacher(User teacher) {
+        this.teacher = teacher;
+    }
 
-public void setEnrollments(List<CourseStudent> enrollments) {
-    this.enrollments = enrollments;
-}
+    public List<CourseStudent> getEnrollments() {
+        return enrollments;
+    }
+
+    public void setEnrollments(List<CourseStudent> enrollments) {
+        this.enrollments = enrollments;
+    }
 }
